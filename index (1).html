@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart AI Hub — AI Operations for Local Businesses</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ── RESET & ROOT ─────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:       #060911;
+  --bg2:      #0C1220;
+  --bg3:      #111927;
+  --border:   #1A2540;
+  --border2:  #243050;
+  --amber:    #F5A623;
+  --amber2:   #E09018;
+  --amber-glow: rgba(245,166,35,0.15);
+  --cyan:     #22D3EE;
+  --green:    #10B981;
+  --purple:   #A78BFA;
+  --white:    #FFFFFF;
+  --text:     #E2E8F0;
+  --muted:    #64748B;
+  --subtle:   #1E2D42;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── CUSTOM CURSOR ────────────────────────────────────── */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--amber);
+  border-radius: 50%;
+  position: fixed; pointer-events: none;
+  z-index: 9999; transform: translate(-50%,-50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
+}
+.cursor-ring {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(245,166,35,0.4);
+  border-radius: 50%;
+  position: fixed; pointer-events: none;
+  z-index: 9998; transform: translate(-50%,-50%);
+  transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
+}
+
+/* ── NOISE OVERLAY ────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 150px;
+}
+
+/* ── NAV ──────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 0 48px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(6,9,17,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  animation: fadeDown 0.6s ease both;
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--white);
+}
+.nav-logo span { color: var(--amber); }
+.nav-links {
+  display: flex; align-items: center; gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: 14px; font-weight: 400;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.btn-ghost {
+  padding: 8px 18px; border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: none; color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+.btn-amber {
+  padding: 8px 20px; border-radius: 7px;
+  background: var(--amber); color: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(245,166,35,0.25);
+}
+.btn-amber:hover {
+  background: var(--amber2);
+  box-shadow: 0 0 30px rgba(245,166,35,0.4);
+  transform: translateY(-1px);
+}
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated grid background */
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(26,37,64,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26,37,64,0.4) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+  animation: gridPulse 8s ease-in-out infinite;
+}
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Glow orbs */
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); pointer-events: none;
+  animation: orbFloat 10s ease-in-out infinite;
+}
+.orb1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  animation-delay: 0s;
+}
+.orb2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 70%);
+  bottom: -50px; left: -80px;
+  animation-delay: 3s;
+}
+.orb3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  animation-delay: 6s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+.hero-inner {
+  max-width: 900px;
+  text-align: center;
+  position: relative; z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(245,166,35,0.08);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 100px;
+  padding: 6px 16px 6px 8px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.8s ease 0.2s both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 4px var(--green); }
+  50% { box-shadow: 0 0 12px var(--green); }
+}
+.hero-badge span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--amber);
+  letter-spacing: 1px;
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(42px, 7vw, 80px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1.0;
+  color: var(--white);
+  margin-bottom: 24px;
+  animation: fadeUp 0.8s ease 0.3s both;
+}
+.hero h1 .highlight {
+  color: var(--amber);
+  position: relative;
+}
+.hero h1 .highlight::after {
+  content: '';
+  position: absolute; bottom: 4px; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--amber), transparent);
+  border-radius: 2px;
+}
+
+.hero-sub {
+  font-size: 18px; font-weight: 300;
+  color: var(--muted); max-width: 560px;
+  margin: 0 auto 40px;
+  line-height: 1.7;
+  animation: fadeUp 0.8s ease 0.4s both;
+}
+.hero-sub strong { color: var(--text); font-weight: 500; }
+
+.hero-cta {
+  display: flex; align-items: center;
+  justify-content: center; gap: 14px;
+  margin-bottom: 64px;
+  animation: fadeUp 0.8s ease 0.5s both;
+}
+.btn-primary {
+  padding: 14px 32px; border-radius: 9px;
+  background: var(--amber); color: var(--bg);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 40px rgba(245,166,35,0.3), 0 4px 20px rgba(0,0,0,0.3);
+  letter-spacing: -0.3px;
+}
+.btn-primary:hover {
+  background: var(--amber2);
+  box-shadow: 0 0 60px rgba(245,166,35,0.5), 0 8px 30px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+}
+.btn-outline {
+  padding: 14px 32px; border-radius: 9px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-outline:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+/* Proof strip */
+.hero-proof {
+  display: flex; align-items: center;
+  justify-content: center; gap: 40px;
+  animation: fadeUp 0.8s ease 0.6s both;
+}
+.proof-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.proof-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 800;
+  color: var(--amber); letter-spacing: -1px;
+}
+.proof-label {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+.proof-divider {
+  width: 1px; height: 40px;
+  background: var(--border);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating UI cards in hero */
+.hero-float {
+  position: absolute; z-index: 2;
+  animation: floatCard 6s ease-in-out infinite;
+}
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+.hero-float.left {
+  left: 4%; top: 35%;
+  animation-delay: 1s;
+  display: flex; flex-direction: column; gap: 0;
+}
+.hero-float.right {
+  right: 4%; top: 40%;
+  animation-delay: 3s;
+}
+.float-card {
+  background: rgba(12,18,32,0.9);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  backdrop-filter: blur(20px);
+  min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.float-card-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.float-stat {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: var(--green);
+}
+.float-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.float-bar {
+  margin-top: 10px; height: 3px;
+  background: var(--subtle); border-radius: 2px; overflow: hidden;
+}
+.float-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  animation: barGrow 3s ease-in-out infinite;
+}
+@keyframes barGrow {
+  0% { width: 30%; }
+  50% { width: 85%; }
+  100% { width: 30%; }
+}
+.float-activity {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.activity-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--muted);
+}
+.activity-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── LOGOS STRIP ──────────────────────────────────────── */
+.logos-strip {
+  padding: 28px 48px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+  background: rgba(12,18,32,0.5);
+}
+.logos-label {
+  font-size: 11px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 2px;
+  white-space: nowrap; margin-right: 24px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.logos-list {
+  display: flex; align-items: center;
+  gap: 36px; overflow: hidden;
+}
+.logo-item {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--subtle);
+  letter-spacing: 1px; text-transform: uppercase;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.logo-item:hover { color: var(--muted); }
+
+/* ── SECTION BASE ─────────────────────────────────────── */
+section {
+  padding: 100px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.section-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+.section-tag::before {
+  content: '//';
+  color: var(--subtle);
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800; letter-spacing: -2px;
+  line-height: 1.1; color: var(--white);
+  margin-bottom: 16px;
+}
+.section-title em { color: var(--amber); font-style: normal; }
+.section-sub {
+  font-size: 16px; color: var(--muted);
+  font-weight: 300; max-width: 500px;
+  line-height: 1.7; margin-bottom: 60px;
+}
+
+/* ── FEATURES ─────────────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.feature-card {
+  background: var(--bg2);
+  padding: 40px;
+  transition: background 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--amber), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.feature-card:hover { background: var(--bg3); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+.icon-amber { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.2); }
+.icon-cyan  { background: rgba(34,211,238,0.1);  border: 1px solid rgba(34,211,238,0.2); }
+.icon-green { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.2); }
+.icon-purple{ background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2);}
+.feature-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--white); margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+.feature-desc {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.7; font-weight: 300;
+}
+.feature-tag {
+  display: inline-block; margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 10px; border-radius: 4px;
+}
+.tag-a { background: rgba(245,166,35,0.1); color: var(--amber); }
+.tag-b { background: rgba(34,211,238,0.1); color: var(--cyan); }
+.tag-c { background: rgba(16,185,129,0.1); color: var(--green); }
+.tag-d { background: rgba(167,139,250,0.1); color: var(--purple); }
+
+/* Feature-full (2-col span) */
+.feature-card.full {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.feature-card.full .feature-visual {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  height: 180px;
+  display: flex; flex-direction: column; gap: 8px;
+  justify-content: center;
+}
+.visual-row {
+  display: flex; align-items: center;
+  gap: 10px; padding: 8px 12px;
+  background: var(--bg2);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+.visual-row .v-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%; flex-shrink: 0;
+}
+.visual-row .v-label { flex: 1; color: var(--text); font-weight: 500; }
+.visual-row .v-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+/* ── HOW IT WORKS ─────────────────────────────────────── */
+.how-section {
+  padding: 100px 48px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.how-inner {
+  max-width: 1200px; margin: 0 auto;
+}
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.how-step {
+  background: var(--bg2);
+  padding: 40px;
+  position: relative;
+}
+.how-step::after {
+  content: '';
+  position: absolute; top: 40px; right: 0;
+  width: 1px; height: calc(100% - 80px);
+  background: var(--border);
+}
+.how-step:last-child::after { display: none; }
+.step-number {
+  font-family: 'Syne', sans-serif;
+  font-size: 64px; font-weight: 800;
+  color: var(--border2);
+  line-height: 1; margin-bottom: 20px;
+  letter-spacing: -3px;
+  transition: color 0.3s;
+}
+.how-step:hover .step-number { color: var(--amber); }
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--white); margin-bottom: 10px;
+}
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+
+/* ── CASE STUDY ───────────────────────────────────────── */
+.case-section { padding: 100px 48px; }
+.case-inner {
+  max-width: 1200px; margin: 0 auto;
+}
+.case-card {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.case-left {
+  padding: 56px;
+  border-right: 1px solid var(--border);
+}
+.case-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 100px;
+  padding: 5px 14px 5px 8px;
+  margin-bottom: 24px;
+}
+.case-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+.case-badge span { font-size: 11px; color: var(--green); font-weight: 500; }
+.case-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px; font-weight: 800;
+  color: var(--white); letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+.case-location { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.case-body {
+  font-size: 15px; color: var(--muted);
+  line-height: 1.75; font-weight: 300;
+  margin-bottom: 32px;
+}
+.case-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.case-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 5px 12px;
+  border-radius: 6px; border: 1px solid var(--border2);
+  color: var(--muted);
+}
+.case-right {
+  padding: 56px;
+  background: var(--bg3);
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 28px;
+}
+.result-item {}
+.result-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--muted);
+  margin-bottom: 6px;
+}
+.result-before-after {
+  display: flex; align-items: center; gap: 12px;
+}
+.r-before {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--subtle); text-decoration: line-through;
+}
+.r-arrow { color: var(--amber); font-size: 18px; }
+.r-after {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px; font-weight: 800;
+  color: var(--green); letter-spacing: -1px;
+}
+.result-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.result-divider {
+  height: 1px; background: var(--border);
+}
+
+/* ── PRICING ──────────────────────────────────────────── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.pricing-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  position: relative;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.pricing-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border2);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.pricing-card.featured {
+  border-color: var(--amber);
+  box-shadow: 0 0 40px rgba(245,166,35,0.15);
+}
+.pricing-card.featured:hover {
+  box-shadow: 0 0 60px rgba(245,166,35,0.25), 0 20px 60px rgba(0,0,0,0.4);
+}
+.popular-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--amber); color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500;
+  padding: 4px 14px; border-radius: 100px;
+  letter-spacing: 2px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.plan-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 2px; margin-bottom: 16px;
+}
+.plan-price {
+  font-family: 'Syne', sans-serif;
+  font-size: 52px; font-weight: 800;
+  color: var(--white); letter-spacing: -2px;
+  line-height: 1;
+}
+.plan-price sup {
+  font-size: 22px; font-weight: 600;
+  vertical-align: top; margin-top: 10px;
+  color: var(--muted);
+}
+.plan-period { font-size: 13px; color: var(--muted); margin: 6px 0 24px; }
+.plan-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.plan-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--muted);
+}
+.plan-feature::before {
+  content: '✓';
+  color: var(--green); font-size: 12px;
+  flex-shrink: 0; margin-top: 1px;
+}
+.plan-feature.muted::before { color: var(--subtle); }
+.plan-cta {
+  margin-top: 32px; width: 100%;
+  padding: 12px; border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.plan-cta.ghost {
+  background: none; color: var(--text);
+  border: 1px solid var(--border2);
+}
+.plan-cta.ghost:hover { border-color: var(--amber); color: var(--amber); }
+.plan-cta.solid {
+  background: var(--amber); color: var(--bg);
+  border: none;
+  box-shadow: 0 4px 20px rgba(245,166,35,0.3);
+}
+.plan-cta.solid:hover {
+  background: var(--amber2);
+  box-shadow: 0 4px 30px rgba(245,166,35,0.5);
+}
+
+/* ── CTA BANNER ───────────────────────────────────────── */
+.cta-banner {
+  margin: 0 48px 80px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 64px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 200px;
+  background: radial-gradient(ellipse, rgba(245,166,35,0.12) 0%, transparent 70%);
+}
+.cta-banner h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 800; letter-spacing: -2px;
+  color: var(--white); margin-bottom: 16px;
+  position: relative; z-index: 1;
+}
+.cta-banner p {
+  font-size: 16px; color: var(--muted);
+  font-weight: 300; margin-bottom: 36px;
+  position: relative; z-index: 1;
+}
+.cta-banner-btns {
+  display: flex; justify-content: center;
+  gap: 12px; position: relative; z-index: 1;
+}
+
+/* ── FOOTER ───────────────────────────────────────────── */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 48px;
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 800;
+  color: var(--white);
+}
+.footer-brand span { color: var(--amber); }
+.footer-links {
+  display: flex; gap: 32px; list-style: none;
+}
+.footer-links a {
+  font-size: 13px; color: var(--muted);
+  text-decoration: none; transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--amber); }
+.footer-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+}
+
+/* ── LOGIN MODAL ──────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(6,9,17,0.85);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open {
+  opacity: 1; pointer-events: all;
+}
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  width: 100%; max-width: 440px;
+  padding: 44px;
+  position: relative;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.3s;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+}
+.modal-overlay.open .modal {
+  transform: translateY(0) scale(1);
+}
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--muted); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { color: var(--white); border-color: var(--border2); }
+.modal-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: var(--white); margin-bottom: 8px;
+}
+.modal-logo span { color: var(--amber); }
+.modal-tagline {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 32px; font-weight: 300;
+}
+
+.tab-switcher {
+  display: flex; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 3px; margin-bottom: 28px;
+}
+.tab-switch-btn {
+  flex: 1; padding: 8px; border-radius: 6px;
+  border: none; background: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500; color: var(--muted);
+  transition: all 0.2s;
+}
+.tab-switch-btn.active {
+  background: var(--bg2); color: var(--white);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 12px; font-weight: 500;
+  color: var(--muted); margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.form-input {
+  width: 100%; padding: 12px 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(245,166,35,0.1);
+}
+.form-input::placeholder { color: var(--subtle); }
+
+.form-select {
+  width: 100%; padding: 12px 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.form-select:focus { border-color: var(--amber); }
+.form-select option { background: var(--bg2); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.btn-form {
+  width: 100%; padding: 13px;
+  background: var(--amber); color: var(--bg);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  border: none; border-radius: 8px; cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(245,166,35,0.3);
+  margin-top: 4px;
+}
+.btn-form:hover {
+  background: var(--amber2);
+  box-shadow: 0 4px 30px rgba(245,166,35,0.5);
+  transform: translateY(-1px);
+}
+.form-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0;
+}
+.form-divider::before, .form-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border);
+}
+.form-divider span { font-size: 11px; color: var(--subtle); white-space: nowrap; }
+.btn-google {
+  width: 100%; padding: 11px;
+  background: none; border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-google:hover { border-color: var(--border2); background: var(--bg3); }
+.modal-foot {
+  text-align: center; margin-top: 20px;
+  font-size: 12px; color: var(--muted);
+}
+.modal-foot a { color: var(--amber); text-decoration: none; }
+
+/* Plan-selection inside signup */
+.plan-pills {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.plan-pill {
+  flex: 1; min-width: 80px;
+  padding: 8px 4px; border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.plan-pill input { display: none; }
+.plan-pill-name { font-size: 12px; font-weight: 600; color: var(--muted); }
+.plan-pill-price {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 800;
+  color: var(--subtle);
+}
+.plan-pill:has(input:checked) {
+  border-color: var(--amber);
+  background: rgba(245,166,35,0.08);
+}
+.plan-pill:has(input:checked) .plan-pill-name { color: var(--amber); }
+.plan-pill:has(input:checked) .plan-pill-price { color: var(--amber); }
+
+/* ── SCROLL ANIMATIONS ────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero-float { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card.full { grid-column: 1; display: block; }
+  .case-card { grid-template-columns: 1fr; }
+  .case-left, .case-right { border: none; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: 1fr; }
+  .how-step::after { display: none; }
+}
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  section { padding: 60px 20px; }
+  .hero { padding: 100px 20px 60px; }
+  .hero h1 { font-size: 42px; letter-spacing: -2px; }
+  .hero-cta { flex-direction: column; }
+  .hero-proof { gap: 20px; flex-wrap: wrap; }
+  .logos-strip { padding: 20px; flex-wrap: wrap; gap: 16px; }
+  .how-section { padding: 60px 20px; }
+  .case-section { padding: 60px 20px; }
+  .cta-banner { margin: 0 20px 60px; padding: 40px 28px; }
+  footer { padding: 32px 20px; }
+  .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+  .modal { padding: 28px 24px; margin: 20px; max-width: calc(100% - 40px); }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav>
+  <div class="nav-logo"><span>Smart</span>AI Hub</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-ghost" onclick="openModal('login')">Sign In</button>
+    <button class="btn-amber" onclick="openModal('signup')">Get Started Free →</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <!-- Floating card left -->
+  <div class="hero-float left">
+    <div class="float-card">
+      <div class="float-card-title">Live — Nest Driving School</div>
+      <div class="float-stat">↓ 94%</div>
+      <div class="float-sub">Lead response time</div>
+      <div class="float-bar"><div class="float-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Floating card right -->
+  <div class="hero-float right">
+    <div class="float-card">
+      <div class="float-card-title">Recent Activity</div>
+      <div class="float-activity">
+        <div class="activity-row">
+          <div class="activity-dot" style="background:#10B981"></div>
+          Lead captured · 2m ago
+        </div>
+        <div class="activity-row">
+          <div class="activity-dot" style="background:#F5A623"></div>
+          Follow-up sent · 5m ago
+        </div>
+        <div class="activity-row">
+          <div class="activity-dot" style="background:#22D3EE"></div>
+          AI call answered · 8m ago
+        </div>
+        <div class="activity-row">
+          <div class="activity-dot" style="background:#A78BFA"></div>
+          Booking confirmed · 12m ago
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      <span>Now Live · First Client Deployed in DMV</span>
+    </div>
+    <h1>
+      Your local business.<br>
+      <span class="highlight">AI-powered.</span><br>
+      Finally.
+    </h1>
+    <p class="hero-sub">
+      One platform with <strong>AI receptionist, workflow automations, and document intelligence</strong> — pre-built for your industry. Live in under an hour.
+    </p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openModal('signup')">Start Free — No Credit Card</button>
+      <button class="btn-outline" onclick="document.getElementById('results').scrollIntoView({behavior:'smooth'})">See Real Results ↓</button>
+    </div>
+    <div class="hero-proof">
+      <div class="proof-item">
+        <div class="proof-val">&lt;90s</div>
+        <div class="proof-label">Lead Response</div>
+      </div>
+      <div class="proof-divider"></div>
+      <div class="proof-item">
+        <div class="proof-val">24/7</div>
+        <div class="proof-label">AI Uptime</div>
+      </div>
+      <div class="proof-divider"></div>
+      <div class="proof-item">
+        <div class="proof-val">1hr</div>
+        <div class="proof-label">Setup Time</div>
+      </div>
+      <div class="proof-divider"></div>
+      <div class="proof-item">
+        <div class="proof-val">$49</div>
+        <div class="proof-label">Starts At /mo</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LOGOS ═══════════════════ -->
+<div class="logos-strip">
+  <span class="logos-label">Built for</span>
+  <div class="logos-list">
+    <span class="logo-item">Driving Schools</span>
+    <span class="logo-item">·</span>
+    <span class="logo-item">Dental Clinics</span>
+    <span class="logo-item">·</span>
+    <span class="logo-item">Med Spas</span>
+    <span class="logo-item">·</span>
+    <span class="logo-item">Real Estate</span>
+    <span class="logo-item">·</span>
+    <span class="logo-item">Salons</span>
+    <span class="logo-item">·</span>
+    <span class="logo-item">Restaurants</span>
+    <span class="logo-item">·</span>
+    <span class="logo-item">Auto Shops</span>
+  </div>
+</div>
+
+<!-- ═══════════════════ FEATURES ═══════════════════ -->
+<section id="features">
+  <div class="section-tag">Features</div>
+  <h2 class="section-title">Everything you need.<br><em>Nothing you don't.</em></h2>
+  <p class="section-sub">Four AI-powered tools that work together — pre-configured the moment you select your business type.</p>
+
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feature-icon icon-amber">🤖</div>
+      <div class="feature-name">AI Voice Receptionist</div>
+      <div class="feature-desc">An AI agent answers your phone calls, books appointments, and handles FAQs around the clock — even at 2am on a Sunday. Powered by ElevenLabs voice synthesis. Sounds real. Works better.</div>
+      <div class="feature-tag tag-a">ElevenLabs Powered</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-cyan">⚡</div>
+      <div class="feature-name">Workflow Automations</div>
+      <div class="feature-desc">Build no-code automation flows for lead follow-up, appointment reminders, review requests, and re-engagement campaigns. Connect to your existing tools via Make.com, Zapier, or direct webhooks.</div>
+      <div class="feature-tag tag-b">Make.com + Zapier</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-green">📄</div>
+      <div class="feature-name">Document Intelligence</div>
+      <div class="feature-desc">Upload any business document — contracts, policy guides, employee handbooks, menus — and ask questions about it in plain English. Instant answers, no searching through PDFs.</div>
+      <div class="feature-tag tag-c">RAG + pgvector</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-purple">📊</div>
+      <div class="feature-name">Operations Dashboard</div>
+      <div class="feature-desc">Live metrics: leads captured, automations fired, calls handled, time saved. Everything in one view — updated in real time. Finally know what your AI is actually doing for you.</div>
+      <div class="feature-tag tag-d">Real-time Metrics</div>
+    </div>
+    <div class="feature-card full reveal">
+      <div>
+        <div class="feature-icon icon-amber">🎯</div>
+        <div class="feature-name">Industry-Specific Onboarding</div>
+        <div class="feature-desc">Select your business type and Smart AI Hub pre-loads the exact tools, workflow templates, and AI prompts built for your industry. A driving school gets driving-school AI. A salon gets salon AI. Setup in under one hour — not weeks.</div>
+        <div class="feature-tag tag-a">6 Verticals Ready</div>
+      </div>
+      <div class="feature-visual">
+        <div class="visual-row">
+          <div class="v-dot" style="background:#F5A623"></div>
+          <span class="v-label">Driving School</span>
+          <span class="v-val" style="color:#10B981">✓ Pre-loaded</span>
+        </div>
+        <div class="visual-row">
+          <div class="v-dot" style="background:#22D3EE"></div>
+          <span class="v-label">Dental / Medical</span>
+          <span class="v-val" style="color:#10B981">✓ Pre-loaded</span>
+        </div>
+        <div class="visual-row">
+          <div class="v-dot" style="background:#A78BFA"></div>
+          <span class="v-label">Salon / Med Spa</span>
+          <span class="v-val" style="color:#10B981">✓ Pre-loaded</span>
+        </div>
+        <div class="visual-row">
+          <div class="v-dot" style="background:#F472B6"></div>
+          <span class="v-label">Real Estate</span>
+          <span class="v-val" style="color:#10B981">✓ Pre-loaded</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<div class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-tag">How It Works</div>
+    <h2 class="section-title">From signup to <em>live</em><br>in three steps.</h2>
+    <p class="section-sub" style="margin-bottom:48px">No technical team needed. No configuration headaches. Built for business owners, not developers.</p>
+    <div class="how-steps reveal">
+      <div class="how-step">
+        <div class="step-number">01</div>
+        <div class="step-title">Pick your business type</div>
+        <div class="step-desc">Select your industry from the onboarding screen. Smart AI Hub instantly pre-loads the tools, AI prompts, and workflow templates built specifically for your type of business.</div>
+      </div>
+      <div class="how-step">
+        <div class="step-number">02</div>
+        <div class="step-title">Connect your existing tools</div>
+        <div class="step-desc">Link your phone number, booking calendar, CRM, or email with guided setup. Most connections take under 10 minutes — no code required, no consultant needed.</div>
+      </div>
+      <div class="how-step">
+        <div class="step-number">03</div>
+        <div class="step-title">Go live — AI does the rest</div>
+        <div class="step-desc">Your AI receptionist answers calls. Automations follow up on leads. Your dashboard tracks every result. You focus on running your business while Smart AI Hub handles the rest.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ RESULTS ═══════════════════ -->
+<div class="case-section" id="results">
+  <div class="case-inner">
+    <div class="section-tag">Real Results</div>
+    <h2 class="section-title">Not a concept.<br><em>Already working.</em></h2>
+    <p class="section-sub">Our first client is live in production today. These are real numbers from a real business in the DMV.</p>
+    <div class="case-card reveal">
+      <div class="case-left">
+        <div class="case-badge">
+          <div class="case-badge-dot"></div>
+          <span>Live in Production</span>
+        </div>
+        <div class="case-name">Nest Driving School</div>
+        <div class="case-location">Annandale, Virginia · DMV Area</div>
+        <p class="case-body">Nest Driving School deployed the full Smart AI Hub stack — an ElevenLabs AI voice receptionist named Nova handles all inbound calls 24/7, five Make.com automation workflows capture every lead and route them to their CRM, and follow-up sequences run automatically. The owner no longer misses a single inquiry after hours.</p>
+        <div class="case-tags">
+          <span class="case-tag">AI Receptionist</span>
+          <span class="case-tag">Lead Automation</span>
+          <span class="case-tag">CRM Integration</span>
+          <span class="case-tag">Follow-up Sequences</span>
+        </div>
+      </div>
+      <div class="case-right">
+        <div class="result-item">
+          <div class="result-label">Lead Response Time</div>
+          <div class="result-before-after">
+            <div class="r-before">6 hrs</div>
+            <div class="r-arrow">→</div>
+            <div class="r-after">&lt;90s</div>
+          </div>
+          <div class="result-desc">Down 94% — every lead gets an instant AI response</div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-item">
+          <div class="result-label">Receptionist Coverage</div>
+          <div class="result-before-after">
+            <div class="r-before">9–5</div>
+            <div class="r-arrow">→</div>
+            <div class="r-after">24/7</div>
+          </div>
+          <div class="result-desc">Nova answers every call, every day, all year</div>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-item">
+          <div class="result-label">Lead Capture Rate</div>
+          <div class="result-before-after">
+            <div class="r-before">~40%</div>
+            <div class="r-arrow">→</div>
+            <div class="r-after">100%</div>
+          </div>
+          <div class="result-desc">Every lead captured, logged, and followed up automatically</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PRICING ═══════════════════ -->
+<section id="pricing">
+  <div class="section-tag">Pricing</div>
+  <h2 class="section-title">Simple pricing.<br><em>No surprises.</em></h2>
+  <p class="section-sub">Start free, scale when you're ready. Every plan includes onboarding support and a 30-day money-back guarantee.</p>
+
+  <div class="pricing-grid reveal">
+    <div class="pricing-card">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><sup>$</sup>49</div>
+      <div class="plan-period">per month, billed monthly</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="plan-feature">AI Chat Assistant</li>
+        <li class="plan-feature">3 workflow automations</li>
+        <li class="plan-feature">50,000 AI tokens/month</li>
+        <li class="plan-feature">1 user account</li>
+        <li class="plan-feature">Email support</li>
+        <li class="plan-feature muted" style="color:var(--subtle)">Voice receptionist</li>
+        <li class="plan-feature muted" style="color:var(--subtle)">Document intelligence</li>
+      </ul>
+      <button class="plan-cta ghost" onclick="openModal('signup')">Get Started</button>
+    </div>
+
+    <div class="pricing-card featured">
+      <div class="popular-badge">Most Popular</div>
+      <div class="plan-name" style="color:var(--amber)">Pro</div>
+      <div class="plan-price"><sup>$</sup>149</div>
+      <div class="plan-period">per month, billed monthly</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="plan-feature">Everything in Starter</li>
+        <li class="plan-feature">AI Voice Receptionist</li>
+        <li class="plan-feature">Document Intelligence (RAG)</li>
+        <li class="plan-feature">5 workflow automations</li>
+        <li class="plan-feature">200,000 AI tokens/month</li>
+        <li class="plan-feature">3 user accounts</li>
+        <li class="plan-feature">Priority support</li>
+      </ul>
+      <button class="plan-cta solid" onclick="openModal('signup')">Start Pro Free →</button>
+    </div>
+
+    <div class="pricing-card">
+      <div class="plan-name">Agency</div>
+      <div class="plan-price"><sup>$</sup>399</div>
+      <div class="plan-period">per month, billed monthly</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="plan-feature">Everything in Pro</li>
+        <li class="plan-feature">White-label branding</li>
+        <li class="plan-feature">Custom subdomain</li>
+        <li class="plan-feature">Unlimited automations</li>
+        <li class="plan-feature">Unlimited tokens</li>
+        <li class="plan-feature">Unlimited team members</li>
+        <li class="plan-feature">Dedicated onboarding call</li>
+      </ul>
+      <button class="plan-cta ghost" onclick="openModal('signup')">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CTA BANNER ═══════════════════ -->
+<div class="cta-banner reveal">
+  <h2>Your competitors are getting AI.<br>Are you?</h2>
+  <p>Join local businesses across the DMV using Smart AI Hub to capture more leads, save more time, and win more customers — automatically.</p>
+  <div class="cta-banner-btns">
+    <button class="btn-primary" onclick="openModal('signup')">Start Free Today →</button>
+    <button class="btn-outline" onclick="openModal('login')">Sign In</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand"><span>Smart</span>AI Hub</div>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 HasaanAI Labs · Elkton, MD</div>
+  </div>
+</footer>
+
+<!-- ═══════════════════ LOGIN / SIGNUP MODAL ═══════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo"><span>Smart</span>AI Hub</div>
+    <div class="modal-tagline">AI operations for local businesses</div>
+
+    <div class="tab-switcher">
+      <button class="tab-switch-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-switch-btn" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="formLogin">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" placeholder="you@yourbusiness.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" placeholder="••••••••">
+      </div>
+      <button class="btn-form">Sign In to Dashboard →</button>
+      <div class="form-divider"><span>or continue with</span></div>
+      <button class="btn-google">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <div class="modal-foot">
+        Don't have an account? <a href="#" onclick="switchTab('signup')">Create one free</a>
+      </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="formSignup" style="display:none">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-input" placeholder="John">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-input" placeholder="Smith">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Business Email</label>
+        <input type="email" class="form-input" placeholder="john@yourbusiness.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Business Type</label>
+        <select class="form-select">
+          <option value="" disabled selected>Select your industry</option>
+          <option>Driving School</option>
+          <option>Dental / Medical Clinic</option>
+          <option>Med Spa / Wellness</option>
+          <option>Salon / Hair Studio</option>
+          <option>Real Estate Agency</option>
+          <option>Restaurant / Catering</option>
+          <option>Auto Shop</option>
+          <option>Other Local Business</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Choose Your Plan</label>
+        <div class="plan-pills">
+          <label class="plan-pill">
+            <input type="radio" name="plan" value="starter">
+            <div class="plan-pill-name">Starter</div>
+            <div class="plan-pill-price">$49</div>
+          </label>
+          <label class="plan-pill">
+            <input type="radio" name="plan" value="pro" checked>
+            <div class="plan-pill-name">Pro</div>
+            <div class="plan-pill-price">$149</div>
+          </label>
+          <label class="plan-pill">
+            <input type="radio" name="plan" value="agency">
+            <div class="plan-pill-name">Agency</div>
+            <div class="plan-pill-price">$399</div>
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" placeholder="Create a strong password">
+      </div>
+      <button class="btn-form">Create My Account →</button>
+      <div class="form-divider"><span>or</span></div>
+      <button class="btn-google">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign Up with Google
+      </button>
+      <div class="modal-foot">
+        Already have an account? <a href="#" onclick="switchTab('login')">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CURSOR ────────────────────────────────────────────
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+function animCursor() {
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('button, a, .feature-card, .pricing-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '14px'; cursor.style.height = '14px';
+    ring.style.width = '44px'; ring.style.height = '44px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '8px'; cursor.style.height = '8px';
+    ring.style.width = '32px'; ring.style.height = '32px';
+  });
+});
+
+// ── SCROLL REVEAL ─────────────────────────────────────
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 60);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(r => observer.observe(r));
+
+// ── MODAL ─────────────────────────────────────────────
+function openModal(tab) {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  switchTab(tab);
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('formLogin').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('formSignup').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
